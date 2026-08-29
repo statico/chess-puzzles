@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Chess Puzzles</title>
+  </head>
+  <body>
+    <header id="status">Loading…</header>
+
+    <main id="board-wrap">
+      <div id="board"></div>
+    </main>
+
+    <footer>
+      <p id="msg"></p>
+      <div id="controls">
+        <select id="difficulty" aria-label="Difficulty">
+          <option value="easiest">Easiest</option>
+          <option value="easier">Easier</option>
+          <option value="normal" selected>Normal</option>
+          <option value="harder">Harder</option>
+          <option value="hardest">Hardest</option>
+        </select>
+        <button id="hint" type="button">Hint</button>
+        <button id="solution" type="button">Solution</button>
+        <button id="next" type="button">Next</button>
+      </div>
+      <details id="credits">
+        <summary>credits</summary>
+        <ul>
+          <li>Puzzles: <a href="https://database.lichess.org/">Lichess puzzle database</a> — CC0</li>
+          <li>Board: <a href="https://github.com/lichess-org/chessground">chessground</a> — GPL-3.0</li>
+          <li>Pieces: Cburnett chess piece set via chessground — GPL-2.0-or-later, by <a href="https://en.wikipedia.org/wiki/User:Cburnett">Colin M.L. Burnett</a></li>
+          <li>Move validation: <a href="https://github.com/jhlywa/chess.js">chess.js</a> — BSD-2-Clause</li>
+          <li>Source: <a href="https://github.com/statico/chess-puzzles">statico/chess-puzzles</a> — GPL-3.0</li>
+        </ul>
+      </details>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
