@@ -3,18 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
     <title>Chess Puzzles</title>
   </head>
   <body>
-    <header id="status">Loading…</header>
+    <header class="bar">
+      <span id="status"><i class="chip"></i><span id="status-text">Loading…</span></span>
+      <span id="pips" aria-hidden="true"></span>
+      <span id="rating" title="Puzzle rating"></span>
+    </header>
 
     <main id="board-wrap">
       <div id="board"></div>
+      <p id="msg" role="status" aria-live="polite"></p>
     </main>
 
-    <footer>
-      <p id="msg"></p>
-      <div id="controls">
+    <footer class="bar">
+      <label class="select">
         <select id="difficulty" aria-label="Difficulty">
           <option value="easiest">Easiest</option>
           <option value="easier">Easier</option>
@@ -22,21 +27,23 @@
           <option value="harder">Harder</option>
           <option value="hardest">Hardest</option>
         </select>
-        <button id="hint" type="button">Hint</button>
-        <button id="solution" type="button">Solution</button>
-        <button id="next" type="button">Next</button>
-      </div>
-      <details id="credits">
-        <summary>credits</summary>
-        <ul>
-          <li>Puzzles: <a href="https://database.lichess.org/">Lichess puzzle database</a> — CC0</li>
-          <li>Board: <a href="https://github.com/lichess-org/chessground">chessground</a> — GPL-3.0</li>
-          <li>Pieces: Cburnett chess piece set via chessground — GPL-2.0-or-later, by <a href="https://en.wikipedia.org/wiki/User:Cburnett">Colin M.L. Burnett</a></li>
-          <li>Move validation: <a href="https://github.com/jhlywa/chess.js">chess.js</a> — BSD-2-Clause</li>
-          <li>Source: <a href="https://github.com/statico/chess-puzzles">statico/chess-puzzles</a> — GPL-3.0</li>
-        </ul>
-      </details>
+      </label>
+      <span class="grow"></span>
+      <button id="hint" type="button" title="Hint (H)">Hint</button>
+      <button id="solution" type="button" title="Show solution (S)">Solution</button>
+      <button id="next" type="button" title="Next puzzle (N)">Next</button>
+      <button id="info" type="button" popovertarget="credits" aria-label="About">i</button>
     </footer>
+
+    <div id="credits" popover>
+      <ul>
+        <li>Puzzles from the <a href="https://database.lichess.org/">Lichess database</a> — CC0</li>
+        <li>Board by <a href="https://github.com/lichess-org/chessground">chessground</a> — GPL-3.0</li>
+        <li>Cburnett pieces by <a href="https://en.wikipedia.org/wiki/User:Cburnett">Colin M.L. Burnett</a> — GPL-2.0+</li>
+        <li>Moves checked by <a href="https://github.com/jhlywa/chess.js">chess.js</a> — BSD-2</li>
+        <li>Source: <a href="https://github.com/statico/chess-puzzles">statico/chess-puzzles</a></li>
+      </ul>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
