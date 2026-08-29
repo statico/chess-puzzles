@@ -1,7 +1,6 @@
 import { Chess } from 'chess.js'
 import { Chessground } from 'chessground'
 import 'chessground/assets/chessground.base.css'
-import 'chessground/assets/chessground.brown.css'
 import 'chessground/assets/chessground.cburnett.css'
 import './style.css'
 
@@ -23,9 +22,20 @@ const at = (ms, fn) => timers.push(setTimeout(fn, ms))
 
 function msg(text, cls) {
   clearTimeout(msgTimer)
-  $('msg').textContent = text
-  $('msg').className = cls || ''
-  if (text) msgTimer = setTimeout(() => msg('', ''), 5000)
+  const el = $('msg')
+  el.className = text ? `show ${cls || ''}` : ''
+  if (text) {
+    el.textContent = text
+    msgTimer = setTimeout(() => msg('', ''), 5000)
+  }
+}
+
+// One pip per move you still owe the puzzle; they fill in as you play.
+function pips() {
+  const total = Math.floor(moves.length / 2)
+  $('pips').innerHTML = '<i></i>'.repeat(total)
+  const on = Math.floor(idx / 2)
+  $('pips').querySelectorAll('i').forEach((el, k) => el.classList.toggle('on', k < on))
 }
 
 function turnColor() {
@@ -53,6 +63,7 @@ function setBoard(playable, lastMove) {
   }
   if (lastMove) cfg.lastMove = lastMove
   cg.set(cfg)
+  pips()
 }
 
 function apply(uci) {
@@ -66,6 +77,8 @@ function done() {
   $('solution').disabled = true
   $('next').textContent = 'Next'
   $('next').classList.add('solved')
+  idx = moves.length
+  pips()
 }
 
 function playOpponent() {
@@ -73,7 +86,7 @@ function playOpponent() {
   idx++
   if (idx >= moves.length) {
     setBoard(false, last)
-    msg(`Puzzle Solved! (ELO ${puzzle.r})`, 'ok')
+    msg('Solved', 'ok')
     done()
   } else {
     setBoard(true, last)
@@ -87,15 +100,16 @@ function onMove(orig, dest) {
 
   if (uci.toLowerCase() !== moves[idx].toLowerCase()) {
     setBoard(true)
-    msg('Incorrect move. Try again!', 'bad')
+    msg('Not the move — try again', 'bad')
     return
   }
 
+  cg.setShapes([])
   apply(uci)
   idx++
   if (idx >= moves.length) {
     setBoard(false, [orig, dest])
-    msg(`Puzzle Solved! (ELO ${puzzle.r})`, 'ok')
+    msg('Solved', 'ok')
     done()
     return
   }
@@ -116,7 +130,10 @@ function load() {
   idx = 0
   playerColor = chess.turn() === 'w' ? 'black' : 'white'
 
-  $('status').textContent = playerColor === 'white' ? '⬜️ White to Move' : '⬛️ Black to Move'
+  $('status-text').textContent = playerColor === 'white' ? 'White to move' : 'Black to move'
+  $('status').classList.toggle('black', playerColor === 'black')
+  $('rating').textContent = puzzle.r
+  pips()
   msg('', '')
   $('hint').disabled = false
   $('solution').disabled = false
@@ -133,17 +150,22 @@ function load() {
     movable: { free: false, color: undefined, dests: new Map(), events: { after: onMove } },
     premovable: { enabled: false },
   }
-  if (cg) cg.set(cfg)
+  if (cg) { cg.set(cfg); cg.setShapes([]) }
   else cg = Chessground($('board'), cfg)
 
   at(250, playOpponent)
 }
 
-$('hint').onclick = () => msg(`Hint: ${moves[idx]}`, 'info')
+$('hint').onclick = () => {
+  const from = moves[idx].slice(0, 2)
+  cg.setShapes([{ orig: from, brush: 'blue' }])
+  msg(`Hint: move the piece on ${from}`, 'info')
+}
 
 $('solution').onclick = () => {
   const rest = moves.slice(idx)
   msg('Solution: ' + rest.join(' '), 'warn')
+  cg.setShapes([])
   setBoard(false)
   rest.forEach((uci, k) =>
     at(500 * (k + 1), () => {
@@ -151,11 +173,16 @@ $('solution').onclick = () => {
       cg.set({ fen: chess.fen(), turnColor: turnColor(), lastMove: last })
     }),
   )
-  idx = moves.length
   done()
 }
 
 $('next').onclick = load
+
+document.onkeydown = (e) => {
+  if (e.metaKey || e.ctrlKey || e.target.tagName === 'SELECT') return
+  const b = { n: 'next', h: 'hint', s: 'solution' }[e.key.toLowerCase()]
+  if (b && !$(b).disabled) $(b).click()
+}
 
 $('difficulty').value = localStorage.getItem('difficulty') || 'normal'
 $('difficulty').onchange = () => {
