@@ -184,6 +184,14 @@ document.onkeydown = (e) => {
   if (b && !$(b).disabled) $(b).click()
 }
 
+const board = $('board-theme')
+board.value = localStorage.getItem('board') || 'slate'
+document.documentElement.dataset.board = board.value
+board.onchange = () => {
+  localStorage.setItem('board', board.value)
+  document.documentElement.dataset.board = board.value
+}
+
 $('difficulty').value = localStorage.getItem('difficulty') || 'normal'
 $('difficulty').onchange = () => {
   localStorage.setItem('difficulty', $('difficulty').value)
