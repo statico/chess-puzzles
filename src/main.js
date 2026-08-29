@@ -16,7 +16,7 @@ const BANDS = {
 const $ = (id) => document.getElementById(id)
 
 let puzzles = []
-let puzzle, chess, cg, moves = [], idx = 0, playerColor, msgTimer, timers = []
+let puzzle, chess, cg, moves = [], idx = 0, playerColor, msgTimer, timers = [], hints = 0
 
 const at = (ms, fn) => timers.push(setTimeout(fn, ms))
 
@@ -72,6 +72,20 @@ function apply(uci) {
   return [from, to]
 }
 
+function result(ok) {
+  const total = Math.floor(moves.length / 2)
+  $('result-mark').textContent = ok ? '✓' : '↩'
+  $('result-mark').className = ok ? 'ok' : ''
+  $('result-title').textContent = ok ? 'Correct' : 'Solution shown'
+  $('result-note').textContent = hints
+    ? `${hints} of ${total} hint${total > 1 ? 's' : ''} used`
+    : ok
+      ? 'No hints used'
+      : `Puzzle rated ${puzzle.r}`
+  $('result').hidden = false
+  $('again').focus({ preventScroll: true })
+}
+
 function done() {
   $('hint').disabled = true
   $('solution').disabled = true
@@ -86,8 +100,8 @@ function playOpponent() {
   idx++
   if (idx >= moves.length) {
     setBoard(false, last)
-    msg('Solved', 'ok')
     done()
+    result(true)
   } else {
     setBoard(true, last)
   }
@@ -109,8 +123,8 @@ function onMove(orig, dest) {
   idx++
   if (idx >= moves.length) {
     setBoard(false, [orig, dest])
-    msg('Solved', 'ok')
     done()
+    result(true)
     return
   }
   setBoard(false, [orig, dest])
@@ -118,6 +132,8 @@ function onMove(orig, dest) {
 }
 
 function load() {
+  $('result').hidden = true
+  hints = 0
   timers.forEach(clearTimeout)
   timers = []
   const [lo, hi] = BANDS[$('difficulty').value] || BANDS.normal
@@ -149,6 +165,7 @@ function load() {
     animation: { duration: 250 },
     movable: { free: false, color: undefined, dests: new Map(), events: { after: onMove } },
     premovable: { enabled: false },
+    drawable: { brushes: { hint: { key: 'h', color: '#1f6feb', opacity: 1, lineWidth: 16 } } },
   }
   if (cg) { cg.set(cfg); cg.setShapes([]) }
   else cg = Chessground($('board'), cfg)
@@ -158,7 +175,8 @@ function load() {
 
 $('hint').onclick = () => {
   const from = moves[idx].slice(0, 2)
-  cg.setShapes([{ orig: from, brush: 'blue' }])
+  hints++
+  cg.setShapes([{ orig: from, brush: 'hint' }])
   msg(`Hint: move the piece on ${from}`, 'info')
 }
 
@@ -171,12 +189,14 @@ $('solution').onclick = () => {
     at(500 * (k + 1), () => {
       const last = apply(uci)
       cg.set({ fen: chess.fen(), turnColor: turnColor(), lastMove: last })
+      if (k === rest.length - 1) result(false)
     }),
   )
   done()
 }
 
 $('next').onclick = load
+$('again').onclick = load
 
 document.onkeydown = (e) => {
   if (e.metaKey || e.ctrlKey || e.target.tagName === 'SELECT') return
