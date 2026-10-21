@@ -14,7 +14,7 @@
     "chessground": "^9.2.1"
   },
   "devDependencies": {
-    "vite": "^8.2.2"
+    "vite": "^8.2.4"
   },
   "private": true
 }
